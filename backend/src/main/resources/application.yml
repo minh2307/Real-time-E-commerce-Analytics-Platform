@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: realtime-analytics
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/ecommerce_db}
+    username: ${DATABASE_USERNAME:ecommerce}
+    password: ${DATABASE_PASSWORD:ecommerce_password}
+  flyway:
+    enabled: true
