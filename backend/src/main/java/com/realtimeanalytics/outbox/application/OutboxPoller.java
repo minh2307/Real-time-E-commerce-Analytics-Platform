@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,16 +26,19 @@ public class OutboxPoller {
     }
 
     @Scheduled(fixedDelayString = "${app.outbox.poll.interval:2000}")
-    @Transactional
     public void processOutboxEvents() {
+        // Step 1: Read pending events (Short DB interaction, auto-commit)
         List<OutboxEvent> events = repository.findPendingEvents(BATCH_SIZE);
         if (events.isEmpty()) {
             return;
         }
 
+        // Step 2: Publish and update each event
         for (OutboxEvent event : events) {
             try {
+                // Network wait happens outside DB transaction
                 publisher.publish(event);
+                
                 event.markPublished(Instant.now());
                 repository.updateStatus(event);
             } catch (Exception e) {
