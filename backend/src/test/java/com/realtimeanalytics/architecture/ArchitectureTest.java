@@ -31,7 +31,7 @@ public class ArchitectureTest {
     static final ArchRule user_should_only_depend_on_common =
             noClasses().that().resideInAPackage(USER)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            SECURITY, CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
+                            CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
                     );
 
     @ArchTest
@@ -83,12 +83,11 @@ public class ArchitectureTest {
                             CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
                     );
 
-    // Cross-module boundaries for internals (repository, entity, infrastructure)
+    // Cross-module boundaries for internals (api, infrastructure)
     private static ArchRule moduleInternalsRule(String moduleName) {
         return noClasses().that().resideOutsideOfPackage(".." + moduleName + "..")
                 .should().dependOnClassesThat().resideInAnyPackage(
-                        ".." + moduleName + ".repository..",
-                        ".." + moduleName + ".entity..",
+                        ".." + moduleName + ".api..",
                         ".." + moduleName + ".infrastructure.."
                 );
     }
@@ -130,4 +129,24 @@ public class ArchitectureTest {
             noClasses().that().haveSimpleNameEndingWith("Controller")
                     .should().dependOnClassesThat().haveSimpleNameEndingWith("Repository")
                     .orShould().dependOnClassesThat().resideInAPackage("..repository..");
+
+    @ArchTest
+    static final ArchRule user_api_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..user.api..")
+                    .should().dependOnClassesThat().resideInAPackage("..user.infrastructure..");
+
+    @ArchTest
+    static final ArchRule user_domain_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..user.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("..user.infrastructure..");
+
+    @ArchTest
+    static final ArchRule user_domain_should_not_depend_on_spring_mvc =
+            noClasses().that().resideInAPackage("..user.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.web..");
+
+    @ArchTest
+    static final ArchRule user_domain_should_not_depend_on_jdbc =
+            noClasses().that().resideInAPackage("..user.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("java.sql..");
 }

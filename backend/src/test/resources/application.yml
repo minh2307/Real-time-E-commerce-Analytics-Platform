@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/ecommerce_db
+    username: ecommerce
+    password: ecommerce_password
+
+security:
+  jwt:
+    secret: aVeryLongTestSecretKeyForHmacSha256ThatMeetsTheLengthRequirement
+    expiration: 3600000
