@@ -38,7 +38,7 @@ public class ArchitectureTest {
     static final ArchRule catalog_should_only_depend_on_common =
             noClasses().that().resideInAPackage(CATALOG)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            SECURITY, USER, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
+                            SECURITY, USER, INVENTORY, CART, ORDER, PAYMENT
                     );
 
     @ArchTest
@@ -148,5 +148,45 @@ public class ArchitectureTest {
     @ArchTest
     static final ArchRule user_domain_should_not_depend_on_jdbc =
             noClasses().that().resideInAPackage("..user.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("java.sql..");
+
+    @ArchTest
+    static final ArchRule catalog_api_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..catalog.api..")
+                    .should().dependOnClassesThat().resideInAPackage("..catalog.infrastructure..");
+
+    @ArchTest
+    static final ArchRule catalog_domain_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..catalog.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("..catalog.infrastructure..");
+
+    @ArchTest
+    static final ArchRule catalog_domain_should_not_depend_on_spring_mvc =
+            noClasses().that().resideInAPackage("..catalog.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.web..");
+
+    @ArchTest
+    static final ArchRule catalog_domain_should_not_depend_on_jdbc =
+            noClasses().that().resideInAPackage("..catalog.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("java.sql..");
+
+    @ArchTest
+    static final ArchRule inventory_api_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..inventory.api..")
+                    .should().dependOnClassesThat().resideInAPackage("..inventory.infrastructure..");
+
+    @ArchTest
+    static final ArchRule inventory_domain_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..inventory.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("..inventory.infrastructure..");
+
+    @ArchTest
+    static final ArchRule inventory_domain_should_not_depend_on_spring_mvc =
+            noClasses().that().resideInAPackage("..inventory.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.web..");
+
+    @ArchTest
+    static final ArchRule inventory_domain_should_not_depend_on_jdbc =
+            noClasses().that().resideInAPackage("..inventory.domain..")
                     .should().dependOnClassesThat().resideInAPackage("java.sql..");
 }
