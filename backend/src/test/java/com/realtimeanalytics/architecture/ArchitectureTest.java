@@ -10,15 +10,15 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 @AnalyzeClasses(packages = "com.realtimeanalytics", importOptions = ImportOption.DoNotIncludeTests.class)
 public class ArchitectureTest {
 
-    private static final String COMMON = "..common..";
-    private static final String SECURITY = "..security..";
-    private static final String USER = "..user..";
-    private static final String CATALOG = "..catalog..";
-    private static final String INVENTORY = "..inventory..";
-    private static final String CART = "..cart..";
-    private static final String ORDER = "..order..";
-    private static final String PAYMENT = "..payment..";
-    private static final String OUTBOX = "..outbox..";
+    private static final String COMMON = "com.realtimeanalytics.common..";
+    private static final String SECURITY = "com.realtimeanalytics.security..";
+    private static final String USER = "com.realtimeanalytics.user..";
+    private static final String CATALOG = "com.realtimeanalytics.catalog..";
+    private static final String INVENTORY = "com.realtimeanalytics.inventory..";
+    private static final String CART = "com.realtimeanalytics.cart..";
+    private static final String ORDER = "com.realtimeanalytics.order..";
+    private static final String PAYMENT = "com.realtimeanalytics.payment..";
+    private static final String OUTBOX = "com.realtimeanalytics.outbox..";
 
     @ArchTest
     static final ArchRule common_should_not_depend_on_other_modules =
@@ -85,10 +85,10 @@ public class ArchitectureTest {
 
     // Cross-module boundaries for internals (api, infrastructure)
     private static ArchRule moduleInternalsRule(String moduleName) {
-        return noClasses().that().resideOutsideOfPackage(".." + moduleName + "..")
+        return noClasses().that().resideOutsideOfPackage("com.realtimeanalytics." + moduleName + "..")
                 .should().dependOnClassesThat().resideInAnyPackage(
-                        ".." + moduleName + ".api..",
-                        ".." + moduleName + ".infrastructure.."
+                        "com.realtimeanalytics." + moduleName + ".api..",
+                        "com.realtimeanalytics." + moduleName + ".infrastructure.."
                 );
     }
 

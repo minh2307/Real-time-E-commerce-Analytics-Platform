@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "airflow-dag-patterns": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/airflow-dag-patterns/SKILL.md",
+      "computedHash": "25d7f454a0dd6fd7d866146faec6c72e077b72c2b42e265b796e18ddfd702141"
+    },
+    "backend-architect": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/backend-architect/SKILL.md",
+      "computedHash": "54823d87ab527c8080d13e98229fd473d271295dc84a01eef09c683af66a3642"
+    },
+    "data-engineer": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/data-engineer/SKILL.md",
+      "computedHash": "e1857cc940e9fe512d0b359e1e248299a06a4ca15c1e45c179a3229b4e481935"
+    },
+    "data-quality-frameworks": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/data-quality-frameworks/SKILL.md",
+      "computedHash": "e32babf4d03a9296b7892d0a722a06e5a7383f32d6250fc0258307e2eeef1f38"
+    },
+    "database-architect": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-architect/SKILL.md",
+      "computedHash": "4932df1414e76da1efab1cb0cc5296af0638a42e03c98373a32baa2edf7d0c20"
+    },
+    "database-migrations-sql-migrations": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/database-migrations-sql-migrations/SKILL.md",
+      "computedHash": "a59031a31b6c1bddfcd80de1912d3c0d85b7314361e3b32ba8c455cd4abd4b4f"
+    },
+    "postgresql": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/postgresql/SKILL.md",
+      "computedHash": "03d057b2a1c0fb18abdd17d5ad85c36704f29cec7e6822681e94e17a0412cb08"
+    },
+    "sql-pro": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/sql-pro/SKILL.md",
+      "computedHash": "4dc07049ede41d300a56163029a588a9d8c9e7a15873423f614c787d99391dff"
+    },
+    "test-driven-development": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/test-driven-development/SKILL.md",
+      "computedHash": "5a25b5b30f8d034328866955007ddf2b502b10ea94402f1fd2eb108b86d7f1e4"
+    }
+  }
+}

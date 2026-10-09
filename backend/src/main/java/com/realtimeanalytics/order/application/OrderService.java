@@ -183,6 +183,56 @@ public class OrderService {
         return getOrder(userEmail, orderId);
     }
 
+    @Transactional
+    public void markOrderAsPaid(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                
+        if (!order.status().equals("PENDING") && !order.status().equals("PAYMENT_FAILED")) {
+            throw new IllegalStateException("Order cannot be marked as paid from status: " + order.status());
+        }
+        
+        orderRepository.updateStatus(orderId, "PAID");
+        
+        String payload = String.format("{\"orderId\":\"%s\",\"customerId\":\"%s\",\"totalAmount\":%s}", 
+                orderId, order.customerId(), order.totalAmount());
+        outboxService.saveEvent("Order", orderId, "ORDER_PAID", payload);
+    }
+
+    @Transactional
+    public void markOrderAsPaymentFailed(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                
+        if (!order.status().equals("PENDING")) {
+            throw new IllegalStateException("Order cannot be marked as payment failed from status: " + order.status());
+        }
+        
+        orderRepository.updateStatus(orderId, "PAYMENT_FAILED");
+        
+        String payload = String.format("{\"orderId\":\"%s\"}", orderId);
+        outboxService.saveEvent("Order", orderId, "ORDER_PAYMENT_FAILED", payload);
+    }
+
+    @Transactional(readOnly = true)
+    public void validateOrderForPayment(String userEmail, UUID orderId, BigDecimal expectedAmount) {
+        UUID userId = resolveUserId(userEmail);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                
+        if (!order.customerId().equals(userId)) {
+            throw new SecurityException("Forbidden");
+        }
+        
+        if (expectedAmount.compareTo(order.totalAmount()) != 0) {
+            throw new IllegalArgumentException("Payment amount does not match order total");
+        }
+
+        if (!order.status().equals("PENDING") && !order.status().equals("PAYMENT_FAILED")) {
+            throw new IllegalStateException("Order is in an invalid state for payment: " + order.status());
+        }
+    }
+
     private OrderResponse buildOrderResponse(Order order, List<OrderItem> items) {
         List<OrderItemResponse> itemResponses = items.stream()
                 .map(item -> new OrderItemResponse(

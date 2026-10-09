@@ -25,14 +25,15 @@ class JdbcUserRepositoryTest {
 
     @Test
     void saveAndFindByEmail_Success() {
-        User user = User.create("test@example.com", "hashedPassword", "First", "Last");
+        String email = java.util.UUID.randomUUID().toString() + "@example.com";
+        User user = User.create(email, "hashedPassword", "First", "Last");
         
         repository.save(user);
         
-        Optional<User> found = repository.findByEmail("test@example.com");
+        Optional<User> found = repository.findByEmail(email);
         assertTrue(found.isPresent());
         assertEquals(user.id(), found.get().id());
-        assertEquals("test@example.com", found.get().email());
+        assertEquals(email, found.get().email());
         assertEquals("hashedPassword", found.get().passwordHash());
         assertEquals("First", found.get().firstName());
         assertEquals("Last", found.get().lastName());
@@ -41,10 +42,11 @@ class JdbcUserRepositoryTest {
 
     @Test
     void existsByEmail_ReturnsTrueWhenExists() {
-        User user = User.create("existing@example.com", "pass", "A", "B");
+        String email = java.util.UUID.randomUUID().toString() + "@example.com";
+        User user = User.create(email, "pass", "A", "B");
         repository.save(user);
         
-        assertTrue(repository.existsByEmail("existing@example.com"));
-        assertFalse(repository.existsByEmail("nonexisting@example.com"));
+        assertTrue(repository.existsByEmail(email));
+        assertFalse(repository.existsByEmail("nonexisting" + email));
     }
 }
