@@ -59,7 +59,7 @@ public class ArchitectureTest {
     static final ArchRule order_should_not_depend_on_unrelated_modules =
             noClasses().that().resideInAPackage(ORDER)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            SECURITY, CART, PAYMENT
+                            PAYMENT
                     );
 
     @ArchTest
@@ -208,5 +208,25 @@ public class ArchitectureTest {
     @ArchTest
     static final ArchRule cart_domain_should_not_depend_on_jdbc =
             noClasses().that().resideInAPackage("..cart.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("java.sql..");
+
+    @ArchTest
+    static final ArchRule order_api_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..order.api..")
+                    .should().dependOnClassesThat().resideInAPackage("..order.infrastructure..");
+
+    @ArchTest
+    static final ArchRule order_domain_should_not_depend_on_infrastructure =
+            noClasses().that().resideInAPackage("..order.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("..order.infrastructure..");
+
+    @ArchTest
+    static final ArchRule order_domain_should_not_depend_on_spring_mvc =
+            noClasses().that().resideInAPackage("..order.domain..")
+                    .should().dependOnClassesThat().resideInAPackage("org.springframework.web..");
+
+    @ArchTest
+    static final ArchRule order_domain_should_not_depend_on_jdbc =
+            noClasses().that().resideInAPackage("..order.domain..")
                     .should().dependOnClassesThat().resideInAPackage("java.sql..");
 }
