@@ -53,7 +53,7 @@ def test_dimensions_creation_and_surrogate_key_determinism(spark):
     payload_c = {"category_id": "cat1", "name": "Cat 1", "slug": "cat1", "parent_category_id": None, "description": "desc"}
     df_cat = create_silver_event(spark, "CATEGORY_CREATED", "CATEGORY", "cat1", payload_c)
     
-    payload_p = {"product_id": "prod1", "sku": "SKU1", "title": "Prod 1", "description": "desc", "category_id": "cat1", "current_price": 10.0, "is_active": True}
+    payload_p = {"productId": "prod1", "sku": "SKU1", "title": "Prod 1", "description": "desc", "category_id": "cat1", "current_price": 10.0, "is_active": True}
     df_prod = create_silver_event(spark, "PRODUCT_CREATED", "PRODUCT", "prod1", payload_p)
     
     payload_u = {"user_id": "user1", "email": "a@b.com", "username": "u1", "full_name": "U 1", "role": "CUSTOMER", "status": "ACTIVE"}
@@ -78,10 +78,10 @@ def test_dimensions_creation_and_surrogate_key_determinism(spark):
 def test_unknown_member_resolution(spark):
     # Fact order items resolving a product that isn't in dimensions
     payload_o = {
-        "order_id": "ord1", "customer_id": "user_unknown", "total_amount": 100.0,
-        "subtotal_amount": 100.0, "tax_amount": 0.0, "shipping_amount": 0.0,
+        "orderId": "ord1", "customerId": "user_unknown", "totalAmount": 100.0,
+        "subtotalAmount": 100.0, "taxAmount": 0.0, "shippingAmount": 0.0,
         "items": [
-            {"order_item_id": "item1", "product_id": "prod_unknown", "quantity": 1, "unit_price": 100.0, "product_sku": "S", "product_title": "T"}
+            {"orderItemId": "item1", "productId": "prod_unknown", "quantity": 1, "unitPrice": 100.0, "productSku": "S", "productTitle": "T"}
         ]
     }
     df_ord = create_silver_event(spark, "ORDER_CREATED", "ORDER", "ord1", payload_o)
@@ -94,7 +94,7 @@ def test_unknown_member_resolution(spark):
     assert row["product_key"] == -1, "Unknown member must be resolved to -1"
 
 def test_fact_orders_one_row_per_order_and_idempotency(spark, temp_dir):
-    payload_o1 = {"order_id": "ord1", "customer_id": "u1", "total_amount": 100.0, "subtotal_amount": 100.0, "tax_amount": 0.0, "shipping_amount": 0.0, "items": []}
+    payload_o1 = {"orderId": "ord1", "customerId": "u1", "totalAmount": 100.0, "subtotalAmount": 100.0, "taxAmount": 0.0, "shippingAmount": 0.0, "items": []}
     df_create = create_silver_event(spark, "ORDER_CREATED", "ORDER", "ord1", payload_o1)
     
     dim_cust = spark.createDataFrame([("u1", 123)], ["customer_id", "customer_key"])
@@ -113,7 +113,7 @@ def test_fact_orders_one_row_per_order_and_idempotency(spark, temp_dir):
     assert res2.count() == 1, "Must be idempotent"
     
     # Now ORDER_PAID arrives late
-    payload_o2 = {"order_id": "ord1", "customer_id": "u1", "total_amount": 100.0, "subtotal_amount": 100.0, "tax_amount": 0.0, "shipping_amount": 0.0, "items": []}
+    payload_o2 = {"orderId": "ord1", "customerId": "u1", "totalAmount": 100.0, "subtotalAmount": 100.0, "taxAmount": 0.0, "shippingAmount": 0.0, "items": []}
     df_paid = create_silver_event(spark, "ORDER_PAID", "ORDER", "ord1", payload_o2)
     
     updates2 = build_fact_orders_updates(df_paid, dim_cust)
@@ -125,7 +125,7 @@ def test_fact_orders_one_row_per_order_and_idempotency(spark, temp_dir):
     assert res3.collect()[0]["gmv_amount"] == 100.0
     
 def test_payment_completed_does_not_create_gmv(spark, temp_dir):
-    payload_o1 = {"order_id": "ord2", "customer_id": "u1", "total_amount": 100.0, "subtotal_amount": 100.0, "tax_amount": 0.0, "shipping_amount": 0.0, "items": []}
+    payload_o1 = {"orderId": "ord2", "customerId": "u1", "totalAmount": 100.0, "subtotalAmount": 100.0, "taxAmount": 0.0, "shippingAmount": 0.0, "items": []}
     df_create = create_silver_event(spark, "ORDER_CREATED", "ORDER", "ord2", payload_o1)
     
     dim_cust = spark.createDataFrame([("u1", 123)], ["customer_id", "customer_key"])
@@ -133,7 +133,7 @@ def test_payment_completed_does_not_create_gmv(spark, temp_dir):
     merge_fact_orders(spark, updates, temp_dir)
     
     # PAYMENT_COMPLETED event
-    payload_p = {"payment_id": "p1", "order_id": "ord2", "customer_id": "u1", "attempt_number": 1, "status": "SUCCESS", "amount": 100.0, "currency": "USD", "payment_method": "CREDIT_CARD", "error_code": None}
+    payload_p = {"paymentId": "p1", "orderId": "ord2", "customerId": "u1", "attemptNumber": 1, "status": "SUCCESS", "amount": 100.0, "currency": "USD", "paymentMethod": "CREDIT_CARD", "errorCode": None}
     df_pay = create_silver_event(spark, "PAYMENT_COMPLETED", "PAYMENT", "p1", payload_p)
     
     # Run Gold Job simulation for PAYMENT_COMPLETED
@@ -148,10 +148,10 @@ def test_payment_completed_does_not_create_gmv(spark, temp_dir):
 
 def test_order_item_price_snapshot(spark):
     payload_o = {
-        "order_id": "ord3", "customer_id": "u1", "total_amount": 120.0,
-        "subtotal_amount": 120.0, "tax_amount": 0.0, "shipping_amount": 0.0,
+        "orderId": "ord3", "customerId": "u1", "totalAmount": 120.0,
+        "subtotalAmount": 120.0, "taxAmount": 0.0, "shippingAmount": 0.0,
         "items": [
-            {"order_item_id": "item1", "product_id": "prod1", "quantity": 1, "unit_price": 120.0, "product_sku": "SKU1", "product_title": "T1"}
+            {"orderItemId": "item1", "productId": "prod1", "quantity": 1, "unitPrice": 120.0, "productSku": "SKU1", "productTitle": "T1"}
         ]
     }
     df_ord = create_silver_event(spark, "ORDER_CREATED", "ORDER", "ord3", payload_o)
@@ -166,13 +166,13 @@ def test_order_item_price_snapshot(spark):
     assert res["unit_price_snapshot"] == 120.0
 
 def test_multiple_payment_attempts(spark, temp_dir):
-    payload_p1 = {"payment_id": "p1", "order_id": "ord4", "customer_id": "u1", "attempt_number": 1, "status": "FAILED", "amount": 50.0, "currency": "USD", "payment_method": "CC", "error_code": "ERR"}
+    payload_p1 = {"paymentId": "p1", "orderId": "ord4", "customerId": "u1", "attemptNumber": 1, "status": "FAILED", "amount": 50.0, "currency": "USD", "paymentMethod": "CC", "errorCode": "ERR"}
     df_p1 = create_silver_event(spark, "PAYMENT_FAILED", "PAYMENT", "p1", payload_p1)
     
-    payload_p2 = {"payment_id": "p2", "order_id": "ord4", "customer_id": "u1", "attempt_number": 2, "status": "FAILED", "amount": 50.0, "currency": "USD", "payment_method": "CC", "error_code": "ERR"}
+    payload_p2 = {"paymentId": "p2", "orderId": "ord4", "customerId": "u1", "attemptNumber": 2, "status": "FAILED", "amount": 50.0, "currency": "USD", "paymentMethod": "CC", "errorCode": "ERR"}
     df_p2 = create_silver_event(spark, "PAYMENT_FAILED", "PAYMENT", "p2", payload_p2)
     
-    payload_p3 = {"payment_id": "p3", "order_id": "ord4", "customer_id": "u1", "attempt_number": 3, "status": "SUCCESS", "amount": 50.0, "currency": "USD", "payment_method": "CC", "error_code": None}
+    payload_p3 = {"paymentId": "p3", "orderId": "ord4", "customerId": "u1", "attemptNumber": 3, "status": "SUCCESS", "amount": 50.0, "currency": "USD", "paymentMethod": "CC", "errorCode": None}
     df_p3 = create_silver_event(spark, "PAYMENT_COMPLETED", "PAYMENT", "p3", payload_p3)
     
     df_all = df_p1.union(df_p2).union(df_p3)
@@ -186,11 +186,11 @@ def test_multiple_payment_attempts(spark, temp_dir):
     
 def test_product_views(spark, temp_dir):
     # Two identical product views from the same session
-    payload_v1 = {"product_id": "prod1", "session_token": "s1", "customer_id": "u1"}
+    payload_v1 = {"productId": "prod1", "sessionToken": "s1", "customerId": "u1"}
     df_v1 = create_silver_event(spark, "PRODUCT_VIEWED", "VIEW", "v1", payload_v1)
     
     # Change event_id to pretend it's a separate legitimate view event
-    payload_v2 = {"product_id": "prod1", "session_token": "s1", "customer_id": "u1"}
+    payload_v2 = {"productId": "prod1", "sessionToken": "s1", "customerId": "u1"}
     df_v2 = create_silver_event(spark, "PRODUCT_VIEWED", "VIEW", "v2", payload_v2)
     
     df_all = df_v1.union(df_v2)
