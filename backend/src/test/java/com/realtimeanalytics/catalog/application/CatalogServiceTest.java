@@ -29,7 +29,7 @@ class CatalogServiceTest {
         categoryRepository = mock(CategoryRepository.class);
         productRepository = mock(ProductRepository.class);
         outboxService = mock(OutboxService.class);
-        catalogService = new CatalogService(categoryRepository, productRepository, outboxService);
+        catalogService = new CatalogService(categoryRepository, productRepository, outboxService, new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     @Test

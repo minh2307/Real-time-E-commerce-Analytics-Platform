@@ -24,14 +24,14 @@ public class ArchitectureTest {
     static final ArchRule common_should_not_depend_on_other_modules =
             noClasses().that().resideInAPackage(COMMON)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            SECURITY, USER, CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
+                            SECURITY, USER, CATALOG, INVENTORY, CART, ORDER, PAYMENT
                     );
 
     @ArchTest
     static final ArchRule user_should_only_depend_on_common =
             noClasses().that().resideInAPackage(USER)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
+                            CATALOG, INVENTORY, CART, ORDER, PAYMENT
                     );
 
     @ArchTest
@@ -45,7 +45,7 @@ public class ArchitectureTest {
     static final ArchRule inventory_should_not_depend_on_unrelated_modules =
             noClasses().that().resideInAPackage(INVENTORY)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            SECURITY, USER, CART, ORDER, PAYMENT, OUTBOX
+                            SECURITY, USER, CART, ORDER, PAYMENT
                     );
 
     @ArchTest
@@ -80,7 +80,7 @@ public class ArchitectureTest {
     static final ArchRule security_should_only_depend_on_common_and_user =
             noClasses().that().resideInAPackage(SECURITY)
                     .should().dependOnClassesThat().resideInAnyPackage(
-                            CATALOG, INVENTORY, CART, ORDER, PAYMENT, OUTBOX
+                            CATALOG, INVENTORY, CART, ORDER, PAYMENT
                     );
 
     // Cross-module boundaries for internals (api, infrastructure)

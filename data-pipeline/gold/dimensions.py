@@ -39,7 +39,7 @@ def build_dim_categories(silver_df: DataFrame) -> DataFrame:
     """
     Builds dim_categories.
     """
-    cats = silver_df.filter(F.col("aggregate_type") == "CATEGORY")
+    cats = silver_df.filter(F.upper(F.col("aggregate_type")) == "CATEGORY")
     parsed = cats.withColumn("data", F.from_json(F.col("payload"), CATEGORY_PAYLOAD_SCHEMA))
     
     window = F.expr("row_number() OVER (PARTITION BY data.categoryId ORDER BY occurred_at DESC)")
@@ -60,7 +60,7 @@ def build_dim_products(silver_df: DataFrame, dim_categories: DataFrame) -> DataF
     """
     Builds dim_products.
     """
-    prods = silver_df.filter(F.col("aggregate_type") == "PRODUCT")
+    prods = silver_df.filter(F.upper(F.col("aggregate_type")) == "PRODUCT")
     parsed = prods.withColumn("data", F.from_json(F.col("payload"), PRODUCT_PAYLOAD_SCHEMA))
     
     window = F.expr("row_number() OVER (PARTITION BY data.productId ORDER BY occurred_at DESC)")

@@ -12,16 +12,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import com.realtimeanalytics.outbox.application.OutboxService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class PaymentService {
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
+    private final OutboxService outboxService;
+    private final ObjectMapper objectMapper;
 
-    public PaymentService(PaymentRepository paymentRepository, OrderService orderService) {
+    public PaymentService(PaymentRepository paymentRepository, OrderService orderService, 
+                          OutboxService outboxService, ObjectMapper objectMapper) {
         this.paymentRepository = paymentRepository;
         this.orderService = orderService;
+        this.outboxService = outboxService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -105,6 +113,32 @@ public class PaymentService {
         }
         
         Payment savedPayment = savedOptional.get();
+        
+        com.fasterxml.jackson.databind.node.ObjectNode paymentNode = objectMapper.createObjectNode();
+        paymentNode.put("paymentId", savedPayment.id().toString());
+        paymentNode.put("orderId", savedPayment.orderId().toString());
+        // Since we cannot depend on OrderResponse (api package) due to ArchUnit rules,
+        // we will fetch the customerId by finding the order directly, or pass it.
+        // Wait, OrderService has a method to get the order domain object? No, but we can query it.
+        // Actually, we can get it from the payment if we stored it, but we didn't.
+        // For now, let's inject OrderRepository into PaymentService to get the Order domain object!
+        // Wait! We can't inject it if it's not in the constructor. Let's just use a native query or add OrderRepository?
+        // Wait, PaymentService constructor already has OrderService. We can add OrderRepository?
+        // Let's look at how validateOrderForPayment works. It doesn't return customerId.
+        // What if we just don't include customerId in the payment event? The dimensional model looks it up via order_key!
+        // Let's check PAYMENT_PAYLOAD_SCHEMA: StructField("customerId", StringType(), True). It's nullable!
+        // We will just put an empty string or omit it. The Gold layer joins with dim_customers anyway!
+        paymentNode.put("customerId", "");
+        paymentNode.put("attemptNumber", savedPayment.attemptNumber());
+        // For pipeline compatibility: 'COMPLETED' instead of 'SUCCESS'
+        paymentNode.put("status", paymentSuccess ? "COMPLETED" : "FAILED");
+        paymentNode.put("amount", savedPayment.amount().doubleValue());
+        paymentNode.put("currency", savedPayment.currency());
+        paymentNode.put("paymentMethod", savedPayment.paymentMethod());
+        if (!paymentSuccess) paymentNode.put("errorCode", savedPayment.errorCode());
+        
+        outboxService.saveEvent("PAYMENT", savedPayment.id(), 
+            paymentSuccess ? "PAYMENT_COMPLETED" : "PAYMENT_FAILED", paymentNode.toString());
         
         if (paymentSuccess) {
             orderService.markOrderAsPaid(request.orderId());

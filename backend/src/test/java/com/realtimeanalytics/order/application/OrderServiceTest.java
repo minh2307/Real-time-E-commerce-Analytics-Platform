@@ -54,7 +54,7 @@ class OrderServiceTest {
         userRepository = mock(UserRepository.class);
         
         orderService = new OrderService(orderRepository, cartRepository, cartItemRepository,
-                cartService, catalogService, inventoryService, outboxService, userRepository);
+                cartService, catalogService, inventoryService, outboxService, userRepository, new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     private User mockUser(String email) {

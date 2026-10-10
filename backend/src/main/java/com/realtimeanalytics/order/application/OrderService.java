@@ -38,6 +38,7 @@ public class OrderService {
     private final InventoryService inventoryService;
     private final OutboxService outboxService;
     private final UserRepository userRepository;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     public OrderService(OrderRepository orderRepository,
                         CartRepository cartRepository,
@@ -46,7 +47,8 @@ public class OrderService {
                         CatalogService catalogService,
                         InventoryService inventoryService,
                         OutboxService outboxService,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
@@ -55,6 +57,7 @@ public class OrderService {
         this.inventoryService = inventoryService;
         this.outboxService = outboxService;
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
     }
 
     private UUID resolveUserId(String userEmail) {
@@ -121,9 +124,31 @@ public class OrderService {
         
         cartService.clearCart(userEmail);
         
-        String payload = String.format("{\"orderId\":\"%s\",\"customerId\":\"%s\",\"totalAmount\":%s}", 
-                finalOrder.id(), userId, finalOrder.totalAmount());
-        outboxService.saveEvent("Order", finalOrder.id(), "ORDER_CREATED", payload);
+        com.fasterxml.jackson.databind.node.ObjectNode payloadNode = objectMapper.createObjectNode();
+        payloadNode.put("orderId", finalOrder.id().toString());
+        payloadNode.put("customerId", userId.toString());
+        payloadNode.put("status", finalOrder.status());
+        payloadNode.put("subtotal", finalOrder.subtotal().doubleValue());
+        payloadNode.put("taxAmount", finalOrder.taxAmount().doubleValue());
+        payloadNode.put("shippingAmount", finalOrder.shippingAmount().doubleValue());
+        payloadNode.put("totalAmount", finalOrder.totalAmount().doubleValue());
+        
+        com.fasterxml.jackson.databind.node.ArrayNode itemsArray = objectMapper.createArrayNode();
+        for (OrderItem item : orderItems) {
+            Product product = catalogService.getProduct(item.productId()).orElseThrow();
+            com.fasterxml.jackson.databind.node.ObjectNode itemNode = objectMapper.createObjectNode();
+            itemNode.put("orderItemId", item.id().toString());
+            itemNode.put("productId", item.productId().toString());
+            itemNode.put("quantity", item.quantity());
+            itemNode.put("unitPrice", item.unitPrice().doubleValue());
+            itemNode.put("productSku", product.sku());
+            itemNode.put("productTitle", product.title());
+            itemNode.put("lineTotalAmount", item.lineTotal().doubleValue());
+            itemsArray.add(itemNode);
+        }
+        payloadNode.set("items", itemsArray);
+        
+        outboxService.saveEvent("Order", finalOrder.id(), "ORDER_CREATED", payloadNode.toString());
         
         return buildOrderResponse(finalOrder, orderItems);
     }

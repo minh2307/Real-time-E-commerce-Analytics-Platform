@@ -30,11 +30,16 @@ class PaymentServiceTest {
     @Mock
     private OrderService orderService;
 
+    @Mock
+    private com.realtimeanalytics.outbox.application.OutboxService outboxService;
+
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
     private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(paymentRepository, orderService);
+        paymentService = new PaymentService(paymentRepository, orderService, outboxService, objectMapper);
     }
 
     @Test

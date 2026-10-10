@@ -16,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.realtimeanalytics.outbox.application.OutboxService;
 
 class AuthServiceTest {
 
@@ -29,7 +30,8 @@ class AuthServiceTest {
         userRepository = mock(UserRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         tokenService = mock(TokenService.class);
-        authService = new AuthService(userRepository, passwordEncoder, tokenService);
+        OutboxService outboxService = mock(OutboxService.class);
+        authService = new AuthService(userRepository, passwordEncoder, tokenService, outboxService, new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     @Test

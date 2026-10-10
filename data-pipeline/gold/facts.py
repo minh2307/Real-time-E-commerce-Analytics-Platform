@@ -10,7 +10,7 @@ def build_fact_orders_updates(silver_df: DataFrame, dim_customers: DataFrame) ->
     Rule: 1 row / 1 order.
     ONLY ORDER_PAID triggers GMV.
     """
-    orders = silver_df.filter(F.col("aggregate_type") == "ORDER")
+    orders = silver_df.filter(F.upper(F.col("aggregate_type")) == "ORDER")
     if orders.isEmpty():
         # Return empty df with correct schema if possible, or just let caller handle empty
         pass # Will return empty dataframe naturally with the following transforms
@@ -116,7 +116,7 @@ def build_fact_payments(silver_df: DataFrame, dim_customers: DataFrame) -> DataF
     Builds fact_payments.
     One row per attempt. Audit only, NO GMV impact.
     """
-    payments = silver_df.filter(F.col("aggregate_type") == "PAYMENT")
+    payments = silver_df.filter(F.upper(F.col("aggregate_type")) == "PAYMENT")
     parsed = payments.withColumn("data", F.from_json(F.col("payload"), PAYMENT_PAYLOAD_SCHEMA))
     
     with_cust = parsed.alias("p").join(
