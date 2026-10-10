@@ -3,8 +3,7 @@ package com.realtimeanalytics.payment.api;
 import com.realtimeanalytics.payment.application.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,11 +18,11 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<PaymentResponse> processPayment(
-            @AuthenticationPrincipal UserDetails userDetails,
+            Authentication authentication,
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Valid @RequestBody PaymentRequest request) {
             
-        PaymentResponse response = paymentService.processPayment(userDetails.getUsername(), idempotencyKey, request);
+        PaymentResponse response = paymentService.processPayment(authentication.getName(), idempotencyKey, request);
         return ResponseEntity.ok(response);
     }
 }

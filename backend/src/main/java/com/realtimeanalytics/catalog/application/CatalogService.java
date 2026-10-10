@@ -1,5 +1,7 @@
 package com.realtimeanalytics.catalog.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.realtimeanalytics.catalog.domain.Category;
 import com.realtimeanalytics.catalog.domain.CategoryRepository;
 import com.realtimeanalytics.catalog.domain.Product;
@@ -19,11 +21,13 @@ public class CatalogService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final OutboxService outboxService;
+    private final ObjectMapper objectMapper;
 
-    public CatalogService(CategoryRepository categoryRepository, ProductRepository productRepository, OutboxService outboxService) {
+    public CatalogService(CategoryRepository categoryRepository, ProductRepository productRepository, OutboxService outboxService, ObjectMapper objectMapper) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.outboxService = outboxService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -41,6 +45,17 @@ public class CatalogService {
     public Category createCategory(UUID parentId, String slug, String name, String description) {
         Category category = Category.create(parentId, slug, name, description);
         categoryRepository.save(category);
+        
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("categoryId", category.id().toString());
+        payload.put("name", category.name());
+        payload.put("slug", category.slug());
+        if (category.parentId() != null) {
+            payload.put("parentCategoryId", category.parentId().toString());
+        }
+        payload.put("description", category.description());
+        outboxService.saveEvent("Category", category.id(), "CATEGORY_CREATED", payload.toString());
+        
         return category;
     }
 
@@ -63,6 +78,17 @@ public class CatalogService {
     public Product createProduct(UUID categoryId, String sku, String title, String description, BigDecimal price) {
         Product product = Product.create(categoryId, sku, title, description, price);
         productRepository.save(product);
+        
+        ObjectNode payload = objectMapper.createObjectNode();
+        payload.put("productId", product.id().toString());
+        payload.put("sku", product.sku());
+        payload.put("title", product.title());
+        payload.put("description", product.description());
+        payload.put("categoryId", product.categoryId().toString());
+        payload.put("currentPrice", product.price().doubleValue());
+        payload.put("isActive", true);
+        outboxService.saveEvent("Product", product.id(), "PRODUCT_CREATED", payload.toString());
+        
         return product;
     }
 

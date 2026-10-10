@@ -214,7 +214,7 @@ public class OrderService {
         outboxService.saveEvent("Order", orderId, "ORDER_PAYMENT_FAILED", payload);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = IllegalStateException.class)
     public void validateOrderForPayment(String userEmail, UUID orderId, BigDecimal expectedAmount) {
         UUID userId = resolveUserId(userEmail);
         Order order = orderRepository.findById(orderId)

@@ -19,15 +19,15 @@ def build_dim_customers(silver_df: DataFrame) -> DataFrame:
     parsed = users.withColumn("data", F.from_json(F.col("payload"), USER_PAYLOAD_SCHEMA))
     
     # SCD Type 1: latest record overwrites
-    window = F.expr("row_number() OVER (PARTITION BY data.user_id ORDER BY occurred_at DESC)")
+    window = F.expr("row_number() OVER (PARTITION BY data.userId ORDER BY occurred_at DESC)")
     latest = parsed.withColumn("rn", window).filter(F.col("rn") == 1)
     
     dim = latest.select(
-        generate_surrogate_key("data.user_id").alias("customer_key"),
-        F.col("data.user_id").alias("customer_id"),
+        generate_surrogate_key("data.userId").alias("customer_key"),
+        F.col("data.userId").alias("customer_id"),
         F.col("data.email").alias("email"),
         F.col("data.username").alias("username"),
-        F.col("data.full_name").alias("full_name"),
+        F.col("data.fullName").alias("full_name"),
         F.col("data.role").alias("role"),
         F.col("data.status").alias("status"),
         F.to_date(F.col("occurred_at")).alias("registration_date") # Simplified from date_key for now
@@ -42,15 +42,15 @@ def build_dim_categories(silver_df: DataFrame) -> DataFrame:
     cats = silver_df.filter(F.col("aggregate_type") == "CATEGORY")
     parsed = cats.withColumn("data", F.from_json(F.col("payload"), CATEGORY_PAYLOAD_SCHEMA))
     
-    window = F.expr("row_number() OVER (PARTITION BY data.category_id ORDER BY occurred_at DESC)")
+    window = F.expr("row_number() OVER (PARTITION BY data.categoryId ORDER BY occurred_at DESC)")
     latest = parsed.withColumn("rn", window).filter(F.col("rn") == 1)
     
     dim = latest.select(
-        generate_surrogate_key("data.category_id").alias("category_key"),
-        F.col("data.category_id").alias("category_id"),
+        generate_surrogate_key("data.categoryId").alias("category_key"),
+        F.col("data.categoryId").alias("category_id"),
         F.col("data.name").alias("name"),
         F.col("data.slug").alias("slug"),
-        F.col("data.parent_category_id").alias("parent_category_id"),
+        F.col("data.parentCategoryId").alias("parent_category_id"),
         F.col("data.description").alias("description")
     )
     
@@ -63,26 +63,26 @@ def build_dim_products(silver_df: DataFrame, dim_categories: DataFrame) -> DataF
     prods = silver_df.filter(F.col("aggregate_type") == "PRODUCT")
     parsed = prods.withColumn("data", F.from_json(F.col("payload"), PRODUCT_PAYLOAD_SCHEMA))
     
-    window = F.expr("row_number() OVER (PARTITION BY data.product_id ORDER BY occurred_at DESC)")
+    window = F.expr("row_number() OVER (PARTITION BY data.productId ORDER BY occurred_at DESC)")
     latest = parsed.withColumn("rn", window).filter(F.col("rn") == 1)
     
     # Resolve category_key
     with_cat = latest.alias("p").join(
         dim_categories.alias("c"),
-        F.col("p.data.category_id") == F.col("c.category_id"),
+        F.col("p.data.categoryId") == F.col("c.category_id"),
         "left"
     )
     
     dim = with_cat.select(
-        generate_surrogate_key("p.data.product_id").alias("product_key"),
-        F.col("p.data.product_id").alias("product_id"),
+        generate_surrogate_key("p.data.productId").alias("product_key"),
+        F.col("p.data.productId").alias("product_id"),
         F.col("p.data.sku").alias("sku"),
         F.col("p.data.title").alias("title"),
         F.col("p.data.description").alias("description"),
         F.coalesce(F.col("c.category_key"), F.lit(-1)).alias("category_key"),
-        F.col("p.data.category_id").alias("category_id"),
-        F.col("p.data.current_price").alias("current_price"),
-        F.col("p.data.is_active").alias("is_active")
+        F.col("p.data.categoryId").alias("category_id"),
+        F.col("p.data.currentPrice").alias("current_price"),
+        F.col("p.data.isActive").alias("is_active")
     )
     
     return dim

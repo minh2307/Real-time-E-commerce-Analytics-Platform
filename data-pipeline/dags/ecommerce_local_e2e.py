@@ -48,6 +48,12 @@ def _check_infrastructure():
         if s.connect_ex(('localhost', 9092)) != 0:
             raise RuntimeError("Kafka is not reachable on localhost:9092")
 
+    # Check Spring Boot API
+    print("Checking Spring Boot API on localhost:8080...")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex(('localhost', 8080)) != 0:
+            raise RuntimeError("Spring Boot API is not reachable on localhost:8080. Please start the backend.")
+
     # Check Spark/Python
     if not os.path.exists(VENV_PYTHON):
         raise RuntimeError(f"Python not found at {VENV_PYTHON}")
@@ -76,7 +82,7 @@ t_check_infra = PythonOperator(
 
 t_produce_events = BashOperator(
     task_id='produce_events',
-    bash_command=f"cd \"{PROJECT_ROOT}\" && export PYTHONPATH=\"{PROJECT_ROOT}/data-pipeline\" && \"{VENV_PYTHON}\" data-pipeline/scripts/generate_e2e_data.py",
+    bash_command=f"cd \"{PROJECT_ROOT}\" && export PYTHONPATH=\"{PROJECT_ROOT}/data-pipeline\" && \"{VENV_PYTHON}\" test/e2e/simulate_app_traffic.py",
     dag=dag
 )
 

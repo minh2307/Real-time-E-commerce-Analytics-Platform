@@ -5,65 +5,65 @@ from pyspark.sql.types import (
 # We define the JSON schemas that will be used to parse the 'payload' column from Silver events
 
 ORDER_ITEM_SCHEMA = StructType([
-    StructField("order_item_id", StringType(), True),
-    StructField("product_id", StringType(), True),
+    StructField("orderItemId", StringType(), True),
+    StructField("productId", StringType(), True),
     StructField("quantity", IntegerType(), True),
-    StructField("unit_price", DoubleType(), True),
-    StructField("product_sku", StringType(), True),
-    StructField("product_title", StringType(), True)
+    StructField("unitPrice", DoubleType(), True),
+    StructField("productSku", StringType(), True),
+    StructField("productTitle", StringType(), True)
 ])
 
 ORDER_PAYLOAD_SCHEMA = StructType([
-    StructField("order_id", StringType(), True),
-    StructField("customer_id", StringType(), True),
-    StructField("total_amount", DoubleType(), True),
-    StructField("subtotal_amount", DoubleType(), True),
-    StructField("tax_amount", DoubleType(), True),
-    StructField("shipping_amount", DoubleType(), True),
+    StructField("orderId", StringType(), True),
+    StructField("customerId", StringType(), True),
+    StructField("totalAmount", DoubleType(), True),
+    StructField("subtotalAmount", DoubleType(), True),
+    StructField("taxAmount", DoubleType(), True),
+    StructField("shippingAmount", DoubleType(), True),
     StructField("items", ArrayType(ORDER_ITEM_SCHEMA), True)
 ])
 
 PAYMENT_PAYLOAD_SCHEMA = StructType([
-    StructField("payment_id", StringType(), True),
-    StructField("order_id", StringType(), True),
-    StructField("customer_id", StringType(), True),
-    StructField("attempt_number", IntegerType(), True),
+    StructField("paymentId", StringType(), True),
+    StructField("orderId", StringType(), True),
+    StructField("customerId", StringType(), True),
+    StructField("attemptNumber", IntegerType(), True),
     StructField("status", StringType(), True),
     StructField("amount", DoubleType(), True),
     StructField("currency", StringType(), True),
-    StructField("payment_method", StringType(), True),
-    StructField("error_code", StringType(), True)
+    StructField("paymentMethod", StringType(), True),
+    StructField("errorCode", StringType(), True)
 ])
 
 USER_PAYLOAD_SCHEMA = StructType([
-    StructField("user_id", StringType(), True),
+    StructField("userId", StringType(), True),
     StructField("email", StringType(), True),
     StructField("username", StringType(), True),
-    StructField("full_name", StringType(), True),
+    StructField("fullName", StringType(), True),
     StructField("role", StringType(), True),
     StructField("status", StringType(), True)
 ])
 
 PRODUCT_PAYLOAD_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
+    StructField("productId", StringType(), True),
     StructField("sku", StringType(), True),
     StructField("title", StringType(), True),
     StructField("description", StringType(), True),
-    StructField("category_id", StringType(), True),
-    StructField("current_price", DoubleType(), True),
-    StructField("is_active", BooleanType(), True)
+    StructField("categoryId", StringType(), True),
+    StructField("currentPrice", DoubleType(), True),
+    StructField("isActive", BooleanType(), True)
 ])
 
 CATEGORY_PAYLOAD_SCHEMA = StructType([
-    StructField("category_id", StringType(), True),
+    StructField("categoryId", StringType(), True),
     StructField("name", StringType(), True),
     StructField("slug", StringType(), True),
-    StructField("parent_category_id", StringType(), True),
+    StructField("parentCategoryId", StringType(), True),
     StructField("description", StringType(), True)
 ])
 
 VIEW_PAYLOAD_SCHEMA = StructType([
-    StructField("product_id", StringType(), True),
-    StructField("session_token", StringType(), True),
-    StructField("customer_id", StringType(), True)
+    StructField("productId", StringType(), True),
+    StructField("sessionToken", StringType(), True),
+    StructField("customerId", StringType(), True)
 ])
