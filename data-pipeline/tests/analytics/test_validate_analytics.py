@@ -15,7 +15,7 @@ def run_validator(data_dir):
     env = os.environ.copy()
     env["GOLD_OUTPUT_DIR"] = os.path.join(data_dir, "gold")
     env["PYTHONPATH"] = os.path.abspath("data-pipeline")
-    script_path = os.path.abspath("validate_analytics.py")
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "validate_analytics.py")
     return subprocess.run(
         [sys.executable, script_path], 
         env=env, 

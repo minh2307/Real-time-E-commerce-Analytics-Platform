@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 import os
 import duckdb
@@ -36,7 +37,7 @@ def create_mock_data(gold_dir):
         "status": ["ACTIVE", "NONE"],
         "registration_date": [None, None]
     })
-    write_parquet(os.path.join(gold_dir, "dim_customers", "part1.parquet"), customers)
+    write_parquet(os.path.join(gold_dir, "dimensions/dim_customers", "part1.parquet"), customers)
     
     # dim_products
     products = pa.table({
@@ -50,7 +51,7 @@ def create_mock_data(gold_dir):
         "current_price": [150.0, 250.0],
         "is_active": [True, True]
     })
-    write_parquet(os.path.join(gold_dir, "dim_products", "part1.parquet"), products)
+    write_parquet(os.path.join(gold_dir, "dimensions/dim_products", "part1.parquet"), products)
 
     # dim_categories
     categories = pa.table({
@@ -61,7 +62,7 @@ def create_mock_data(gold_dir):
         "parent_category_id": [None],
         "description": ["Desc"]
     })
-    write_parquet(os.path.join(gold_dir, "dim_categories", "part1.parquet"), categories)
+    write_parquet(os.path.join(gold_dir, "dimensions/dim_categories", "part1.parquet"), categories)
 
     # fact_orders
     # Order 1: Paid (GMV 100.0) - cust1
@@ -82,7 +83,7 @@ def create_mock_data(gold_dir):
         "updated_at": [None, None],
         "cancelled_at": [None, None]
     })
-    write_parquet(os.path.join(gold_dir, "fact_orders", "part1.parquet"), orders)
+    write_parquet(os.path.join(gold_dir, "facts/fact_orders", "part1.parquet"), orders)
 
     # fact_order_items
     # Order 1 has 2 items (P1 x1 @ 40, P2 x1 @ 60 = 100)
@@ -98,7 +99,7 @@ def create_mock_data(gold_dir):
         "quantity": [1, 1],
         "line_total_amount": [40.0, 60.0]
     })
-    write_parquet(os.path.join(gold_dir, "fact_order_items", "part1.parquet"), items)
+    write_parquet(os.path.join(gold_dir, "facts/fact_order_items", "part1.parquet"), items)
 
     # fact_payments
     # Order 1 had 3 payments attempts: FAIL, FAIL, SUCCESS
@@ -116,7 +117,7 @@ def create_mock_data(gold_dir):
         "error_code": ["E1", "E2", None],
         "created_at": [None, None, None]
     })
-    write_parquet(os.path.join(gold_dir, "fact_payments", "part1.parquet"), payments)
+    write_parquet(os.path.join(gold_dir, "facts/fact_payments", "part1.parquet"), payments)
 
     # fact_product_views
     views = pa.table({
@@ -128,7 +129,7 @@ def create_mock_data(gold_dir):
         "session_token": ["sess1", "sess1"],
         "created_at": [None, None]
     })
-    write_parquet(os.path.join(gold_dir, "fact_product_views", "part1.parquet"), views)
+    write_parquet(os.path.join(gold_dir, "facts/fact_product_views", "part1.parquet"), views)
 
 def test_daily_gmv(duckdb_conn):
     conn, config = duckdb_conn

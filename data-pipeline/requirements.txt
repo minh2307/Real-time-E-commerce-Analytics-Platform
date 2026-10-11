@@ -6,3 +6,4 @@ duckdb==1.5.6
 apache-airflow==2.9.2
 
 psycopg2-binary==2.9.13
+pandas==3.0.6
