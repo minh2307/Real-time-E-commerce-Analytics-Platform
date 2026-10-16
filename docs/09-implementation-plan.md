@@ -206,7 +206,7 @@ TASK 07–12 were implemented during project execution but were not fully repres
 
 *Important:* Outbox was implemented BEFORE the remaining business domains. This is an intentional implementation-order deviation rather than pretending the old phase ordering was followed exactly.
 
-## 16. Remaining Implementation Milestones (Tasks 13-19)
+## 16. Remaining Implementation Milestones (Tasks 13-20)
 
 ### Backend Phase A — User & Authentication
 **TASK 13 — User & Authentication**
@@ -271,3 +271,25 @@ This task should replace the current mock-only application side of E2E. The exis
 **TASK 19 — Full Local E2E Validation**
 Scope: API $\rightarrow$ PostgreSQL $\rightarrow$ Outbox $\rightarrow$ Kafka $\rightarrow$ Bronze $\rightarrow$ Silver $\rightarrow$ Gold $\rightarrow$ DuckDB $\rightarrow$ Data Quality Validation
 Includes: reproducible local run, data quality checks, event counts, order/payment consistency, resource profiling, documentation. Do NOT introduce cloud deployment.
+
+### CI/CD Phase — Automation
+**TASK 20 — CI/CD Pipeline Automation**
+Scope includes:
+- GitHub Actions CI/CD pipeline configuration (`.github/workflows/ci.yml`) triggering on push and pull_request to `main` and `master` branches.
+- Backend CI workflow (`backend-tests`):
+  - Java 21 JDK setup (Eclipse Temurin) with automated Gradle dependency caching (`cache: 'gradle'`).
+  - PostgreSQL 16 Alpine service container on port 15432 with health check (`pg_isready`) for Spring Boot Flyway migrations and integration testing.
+  - Gradle test execution (`./gradlew clean test`).
+- Data Pipeline CI workflow (`data-pipeline-tests`):
+  - Python 3.12 environment setup.
+  - Dependency installation from `data-pipeline/requirements.txt`.
+  - Pytest suite execution across Bronze, Silver, Gold, and Analytics modules.
+  - Working directory independence for test runner scripts.
+- Acceptance Criteria:
+  - CI workflow triggers on commit/PR to `main` and `master`.
+  - Backend job sets up JDK 21, Gradle caching, and healthy PostgreSQL service container.
+  - Data pipeline job sets up Python 3.12, installs manifest dependencies, and runs Pytest.
+  - Test suites execute cleanly and deterministically in both local environment and CI runner configuration.
+- Verification Commands:
+  - Backend: `cd backend && ./gradlew test`
+  - Pipeline: `pytest tests/` (executed within `data-pipeline`) and `pytest data-pipeline/tests/` (executed from repo root)
