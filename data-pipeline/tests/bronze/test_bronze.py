@@ -1,8 +1,20 @@
 import sys
 from unittest.mock import MagicMock
-sys.modules['pyarrow'] = MagicMock()
-sys.modules['pyarrow.parquet'] = MagicMock()
-sys.modules['confluent_kafka'] = MagicMock()
+
+# Only mock dependencies if they are not installed in the environment (fallback mode)
+if 'confluent_kafka' not in sys.modules:
+    try:
+        import confluent_kafka
+    except ImportError:
+        sys.modules['confluent_kafka'] = MagicMock()
+
+if 'pyarrow' not in sys.modules:
+    try:
+        import pyarrow
+        import pyarrow.parquet
+    except ImportError:
+        sys.modules['pyarrow'] = MagicMock()
+        sys.modules['pyarrow.parquet'] = MagicMock()
 
 import json
 import os

@@ -14,8 +14,10 @@ def write_parquet(path, table):
 def run_validator(data_dir):
     env = os.environ.copy()
     env["GOLD_OUTPUT_DIR"] = os.path.join(data_dir, "gold")
-    env["PYTHONPATH"] = os.path.abspath("data-pipeline")
-    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "validate_analytics.py")
+    pipeline_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    script_path = os.path.join(pipeline_dir, "validate_analytics.py")
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = f"{pipeline_dir}:{existing_pythonpath}" if existing_pythonpath else pipeline_dir
     return subprocess.run(
         [sys.executable, script_path], 
         env=env, 
